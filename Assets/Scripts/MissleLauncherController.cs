@@ -10,10 +10,22 @@ public class MissleLauncherController : MonoBehaviourPun
     public GameObject misslePrefab;
 
     private Vector3 initialMousePressPosition = Vector3.zero;
+
+    float direction = 1f;
+
+    Color launcherColor = Color.green;
     // Start is called before the first frame update
     void Start()
     {
-        
+        if (!PhotonNetwork.IsMasterClient)
+        {
+            direction = -1f;
+            launcherColor = Color.blue;
+        }
+        //Set the color - master is green, other player blue
+        Renderer rend = GetComponent<Renderer>();
+        rend.material.SetColor("_Color", launcherColor);
+
     }
 
     // Update is called once per frame
@@ -52,11 +64,11 @@ public class MissleLauncherController : MonoBehaviourPun
 
     private Vector3 CalcForceOnInstantiatedMissle(Vector3 diff)
     {
-        return new Vector3(diff.x * 10, diff.y * 10, diff.y * 10);
+        return new Vector3(diff.x * 10 * this.direction, diff.y * 10, diff.y * 10 * this.direction);
     }
 
     private Vector3 CalcMissleInitializationPosition(Vector3 position)
     {
-        return position + new Vector3(0, 2, 2);
+        return position + new Vector3(0, 2, 2 * this.direction);
     }
 }

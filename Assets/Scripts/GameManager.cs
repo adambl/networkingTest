@@ -6,11 +6,25 @@ using UnityEngine;
 public class GameManager : MonoBehaviourPunCallbacks
 {
     GameObject missleLauncherPrefab;
+    Vector3 masterPosition = new Vector3(0f, 0.5f, -30f);
+    Vector3 secondPlayerPosition = new Vector3(0f, 0.5f, 30f); 
 
     public void Start()
     {
-        PhotonNetwork.Instantiate(missleLauncherPrefab.name, Vector3.zero, Quaternion.identity);
+        Debug.Log(string.Format("In GameManager. IsMasterClient: {0}", PhotonNetwork.IsMasterClient));
+
+        Vector3 launcherPosition = masterPosition;
+        if (!PhotonNetwork.IsMasterClient)
+        {
+            launcherPosition = secondPlayerPosition;
+        }
+
+        GameObject missleLauncher = PhotonNetwork.Instantiate(
+            "MissleLauncher", 
+            launcherPosition, 
+            Quaternion.identity);
     }
+
     [Tooltip("The prefab to use for representing the player")]
     public GameObject playerPrefab;
 
