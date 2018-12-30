@@ -17,7 +17,8 @@ public class MissleLauncherController : MonoBehaviourPun
     // Start is called before the first frame update
     void Start()
     {
-        if (!PhotonNetwork.IsMasterClient)
+        if ((!PhotonNetwork.IsMasterClient && photonView.IsMine) ||
+            (PhotonNetwork.IsMasterClient && !photonView.IsMine))
         {
             direction = -1f;
             launcherColor = Color.blue;
