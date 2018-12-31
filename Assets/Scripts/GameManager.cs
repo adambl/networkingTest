@@ -2,6 +2,7 @@
 using Photon.Pun;
 using Photon.Realtime;
 using UnityEngine;
+using Hashtable = ExitGames.Client.Photon.Hashtable;
 
 public class GameManager : MonoBehaviourPunCallbacks
 {
@@ -48,6 +49,11 @@ public class GameManager : MonoBehaviourPunCallbacks
         SceneManager.LoadScene(0);
     }
 
+    public void OnPhotonCustomRoomPropertiesChanged(Hashtable propertiesThatChanged)
+    {
+        Debug.LogFormat("OnPhotonCustomRoomPropertiesChanged() {0}", propertiesThatChanged.ToString()); // custom room properties changed
+        //Todo - respond to loose indication
+    }
 
     #endregion
 
