@@ -2,16 +2,19 @@
 using Photon.Pun;
 using Photon.Realtime;
 using UnityEngine;
+using Hashtable = ExitGames.Client.Photon.Hashtable;
 
 public class GameManager : MonoBehaviourPunCallbacks
 {
-    GameObject missleLauncherPrefab;
     Vector3 masterPosition = new Vector3(0f, 0.5f, -30f);
-    Vector3 secondPlayerPosition = new Vector3(0f, 0.5f, 30f); 
+    Vector3 secondPlayerPosition = new Vector3(0f, 0.5f, 30f);
 
+    DamageManager damageManager;
     public void Start()
     {
         Debug.Log(string.Format("In GameManager. IsMasterClient: {0}", PhotonNetwork.IsMasterClient));
+
+        PhotonNetwork.CurrentRoom.SetCustomProperties(new Hashtable() { { "Winner", null } });
 
         Vector3 launcherPosition = masterPosition;
         if (!PhotonNetwork.IsMasterClient)
@@ -23,10 +26,16 @@ public class GameManager : MonoBehaviourPunCallbacks
             "MissleLauncher", 
             launcherPosition, 
             Quaternion.identity);
-    }
 
-    [Tooltip("The prefab to use for representing the player")]
-    public GameObject playerPrefab;
+        GameObject building = PhotonNetwork.Instantiate(
+            "Building",
+            launcherPosition + new Vector3(3,0,0),
+            Quaternion.identity);
+
+        damageManager = (DamageManager)GameObject.Find("DamageManager").GetComponent<DamageManager>();
+        //TODO - count adversary buildings and not your own. currently it is the same.
+        damageManager.NumOfBuildings = 1;
+    }
 
     #region Photon Callbacks
     public override void OnPlayerLeftRoom(Player other)
@@ -48,6 +57,12 @@ public class GameManager : MonoBehaviourPunCallbacks
         SceneManager.LoadScene(0);
     }
 
+    public void OnPhotonCustomRoomPropertiesChanged(Hashtable propertiesThatChanged)
+    {
+        Debug.LogFormat("OnPhotonCustomRoomPropertiesChanged() {0}", propertiesThatChanged.ToString()); // custom room properties changed
+        //TODO - respond to win indication
+
+    }
 
     #endregion
 
