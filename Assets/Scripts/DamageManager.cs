@@ -16,8 +16,8 @@ public class DamageManager : MonoBehaviourPun
         Debug.LogFormat("Number of buildings: {0}. destroyed building: {1}", NumOfBuildings, destroyedBuilding);
         if (--NumOfBuildings <= 0)
         {
-            PhotonNetwork.CurrentRoom.SetCustomProperties(new Hashtable() { { "Winner", PhotonNetwork.NickName } },
-                new Hashtable() { { "Winner", null } }
+            PhotonNetwork.CurrentRoom.SetCustomProperties(new Hashtable() { { "Lost", PhotonNetwork.NickName } },
+                new Hashtable() { { "Lost", null } }
             );
             Debug.LogFormat("Set custom properties: {0}. {1}", "Winner", PhotonNetwork.NickName);
         }
@@ -26,7 +26,7 @@ public class DamageManager : MonoBehaviourPun
     private List<(GameObject, float)> GetTargetsDamages(MissleController missle, GameObject hit)
     {
         return GameObject.FindGameObjectsWithTag("Building")
-            .Where(x => !PhotonView.Get(x).IsMine).Where(building => IsInBlastZone(building, missle))
+            .Where(x => PhotonView.Get(x).IsMine).Where(building => IsInBlastZone(building, missle))
             .Select(building => (building, GetBlastDamage(building, missle))).ToList();
     }
 

@@ -8,10 +8,10 @@ using UnityEngine;
 
 public class MissleController : MonoBehaviourPun
 {
-    public float maxBlastDamage = 1f;
+    public float maxBlastDamage = 2f;
 
     private GameObject plane;
-    public float blastRadius = 20f;
+    public float blastRadius = 5f;
 
     public DamageManager damageManager;
 
@@ -32,12 +32,14 @@ public class MissleController : MonoBehaviourPun
     // Update is called once per frame
     void OnCollisionEnter(Collision collision)
     {
-        if (!photonView.IsMine)
+        if (photonView.IsMine)
         {
-            return;
+            DestroySelf();
         }
-        damageManager.ApplyDamage(this, collision.gameObject);
-        DestroySelf();
+        else
+        {
+            damageManager.ApplyDamage(this, collision.gameObject);
+        }
     }
 
     public void Update()

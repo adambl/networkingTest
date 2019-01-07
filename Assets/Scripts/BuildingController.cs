@@ -6,7 +6,7 @@ using System;
 
 public class BuildingController : MonoBehaviourPun
 {
-    public float buildingHealth = 1;
+    public float buildingHealth = 10f;
 
     public void DestroySelf()
     {

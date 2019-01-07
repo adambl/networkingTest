@@ -3,6 +3,8 @@ using Photon.Pun;
 using Photon.Realtime;
 using UnityEngine;
 using Hashtable = ExitGames.Client.Photon.Hashtable;
+using System;
+using UnityEngine.UI;
 
 public class GameManager : MonoBehaviourPunCallbacks
 {
@@ -10,12 +12,30 @@ public class GameManager : MonoBehaviourPunCallbacks
     Vector3 secondPlayerPosition = new Vector3(0f, 0.5f, 30f);
 
     DamageManager damageManager;
+
+    public GameObject gameResultCanvas;
+    public Text gameResultText;
+
+    public string OtherPlayerNickname { get; private set; }
+
+    private string RetrieveOtherPlayerNickname()
+    {
+        if (PhotonNetwork.PlayerListOthers == null || PhotonNetwork.PlayerListOthers.Length == 0)
+        {
+            return null;
+        }
+
+        return PhotonNetwork.PlayerListOthers[0].NickName;
+    }
+
     public void Start()
     {
         Debug.Log(string.Format("In GameManager. IsMasterClient: {0}", PhotonNetwork.IsMasterClient));
+        gameResultCanvas.SetActive(false);
+        PhotonNetwork.CurrentRoom.SetCustomProperties(new Hashtable() { { "Lost", null } });
 
-        PhotonNetwork.CurrentRoom.SetCustomProperties(new Hashtable() { { "Winner", null } });
-
+        OtherPlayerNickname = RetrieveOtherPlayerNickname();
+         
         Vector3 launcherPosition = masterPosition;
         if (!PhotonNetwork.IsMasterClient)
         {
@@ -49,6 +69,11 @@ public class GameManager : MonoBehaviourPunCallbacks
         }
     }
 
+    public void LeaveRoom()
+    {
+        PhotonNetwork.LeaveRoom();
+    }
+
     /// <summary>
     /// Called when the local player left the room. We need to load the launcher scene.
     /// </summary>
@@ -57,23 +82,36 @@ public class GameManager : MonoBehaviourPunCallbacks
         SceneManager.LoadScene(0);
     }
 
-    public void OnPhotonCustomRoomPropertiesChanged(Hashtable propertiesThatChanged)
+    public override void OnRoomPropertiesUpdate(Hashtable propertiesThatChanged)
     {
         Debug.LogFormat("OnPhotonCustomRoomPropertiesChanged() {0}", propertiesThatChanged.ToString()); // custom room properties changed
-        //TODO - respond to win indication
+        //respond to lost indication - Finish the game with winner notification and exit button
+        if (propertiesThatChanged.ContainsKey("Lost") && !string.IsNullOrEmpty((string)propertiesThatChanged["Lost"]))
+        {
+            OnLostDeclared((string)propertiesThatChanged["Lost"]);
 
+        }
     }
 
-    #endregion
-
-    //dfd
-    #region Public Methods
-
-
-    public void LeaveRoom()
+    private void OnLostDeclared(string lostNickname)
     {
-        PhotonNetwork.LeaveRoom();
+        string winnerNickname = GetWinnerNickname(lostNickname);
+        gameResultText.text = string.Format("{0} Won", winnerNickname);
+        gameResultCanvas.SetActive(true);
     }
+
+    private string GetWinnerNickname(string lostNickname)
+    {
+        if (PhotonNetwork.NickName == lostNickname)
+        {
+            return OtherPlayerNickname;
+        }
+
+        return PhotonNetwork.NickName;
+    }
+
+   
+
     #endregion
 }
 
