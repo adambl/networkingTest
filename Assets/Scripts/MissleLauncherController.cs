@@ -4,9 +4,12 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class MissleLauncherController : MonoBehaviourPun
 {
+    private GameManager gameManager;
+
     public GameObject misslePrefab;
 
     private Vector3 initialMousePressPosition = Vector3.zero;
@@ -17,6 +20,8 @@ public class MissleLauncherController : MonoBehaviourPun
     // Start is called before the first frame update
     void Start()
     {
+        gameManager = (GameManager)GameObject.Find("GameManager").GetComponent<GameManager>();
+
         if ((!PhotonNetwork.IsMasterClient && photonView.IsMine) ||
             (PhotonNetwork.IsMasterClient && !photonView.IsMine))
         {
@@ -32,7 +37,9 @@ public class MissleLauncherController : MonoBehaviourPun
     // Update is called once per frame
     void Update()
     {
-        if (!photonView.IsMine)
+        if (!photonView.IsMine ||
+            gameManager.GameOver ||
+            EventSystem.current.IsPointerOverGameObject())
         {
             return;
         }

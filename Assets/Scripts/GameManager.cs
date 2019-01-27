@@ -17,6 +17,7 @@ public class GameManager : MonoBehaviourPunCallbacks
     public Text gameResultText;
 
     public string OtherPlayerNickname { get; private set; }
+    public bool GameOver { get; private set; }
 
     private string RetrieveOtherPlayerNickname()
     {
@@ -31,7 +32,7 @@ public class GameManager : MonoBehaviourPunCallbacks
     public void Start()
     {
         Debug.Log(string.Format("In GameManager. IsMasterClient: {0}", PhotonNetwork.IsMasterClient));
-        gameResultCanvas.SetActive(false);
+        //gameResultCanvas.SetActive(false);
         PhotonNetwork.CurrentRoom.SetCustomProperties(new Hashtable() { { "Lost", null } });
 
         OtherPlayerNickname = RetrieveOtherPlayerNickname();
@@ -67,6 +68,14 @@ public class GameManager : MonoBehaviourPunCallbacks
         {
             Debug.LogFormat("OnPlayerLeftRoom IsMasterClient {0}", PhotonNetwork.IsMasterClient); // called before OnPlayerLeftRoom
         }
+
+        if (!GameOver)
+        {
+            Debug.LogFormat("Ending game in OnPlayerLeftRoom. Setting lost party to {0}", other.NickName);
+            PhotonNetwork.CurrentRoom.SetCustomProperties(new Hashtable() { { "Lost", other.NickName } },
+                new Hashtable() { { "Lost", null } }
+            );
+        }
     }
 
     public void LeaveRoom()
@@ -95,6 +104,7 @@ public class GameManager : MonoBehaviourPunCallbacks
 
     private void OnLostDeclared(string lostNickname)
     {
+        GameOver = true;
         string winnerNickname = GetWinnerNickname(lostNickname);
         gameResultText.text = string.Format("{0} Won", winnerNickname);
         gameResultCanvas.SetActive(true);

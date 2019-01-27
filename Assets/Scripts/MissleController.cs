@@ -8,7 +8,7 @@ using UnityEngine;
 
 public class MissleController : MonoBehaviourPun
 {
-    public float maxBlastDamage = 2f;
+    public float maxBlastDamage = 1f;
 
     private GameObject plane;
     public float blastRadius = 5f;
