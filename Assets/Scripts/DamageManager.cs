@@ -7,6 +7,18 @@ using UnityEngine;
 using Hashtable = ExitGames.Client.Photon.Hashtable;
 using System.Linq;
 
+public class TargetDamage
+{
+    public GameObject Target { get; set; }
+    public float Damage { get; set; }
+
+    public TargetDamage(GameObject target, float damage)
+    {
+        Target = target;
+        Damage = damage;
+    }
+}
+
 public class DamageManager : MonoBehaviourPun
 {
     public int NumOfBuildings { get; set; }
@@ -23,11 +35,11 @@ public class DamageManager : MonoBehaviourPun
         }
     }
 
-    private List<(GameObject, float)> GetTargetsDamages(MissleController missle, GameObject hit)
+    private List<TargetDamage> GetTargetsDamages(MissleController missle, GameObject hit)
     {
         return GameObject.FindGameObjectsWithTag("Building")
             .Where(x => PhotonView.Get(x).IsMine).Where(building => IsInBlastZone(building, missle))
-            .Select(building => (building, GetBlastDamage(building, missle))).ToList();
+            .Select(building => new TargetDamage(building, GetBlastDamage(building, missle))).ToList();
     }
 
     private static float GetBlastDamage(GameObject building, MissleController missle)
@@ -45,12 +57,12 @@ public class DamageManager : MonoBehaviourPun
     {
         GetTargetsDamages(missle, hit).ForEach(obj =>
         {
-            Debug.LogFormat("Inflicting damage on {0}", obj.Item1);
-            BuildingController hitBuilding = obj.Item1.GetComponentInChildren(typeof(BuildingController)) as BuildingController;
-            hitBuilding.InflictDamage(obj.Item2);
+            Debug.LogFormat("Inflicting damage on {0}", obj.Target);
+            BuildingController hitBuilding = obj.Target.GetComponentInChildren(typeof(BuildingController)) as BuildingController;
+            hitBuilding.InflictDamage(obj.Damage);
             if (hitBuilding.IsDestroyed())
             {
-                Debug.LogFormat("Building destroyed {0}", obj.Item1);
+                Debug.LogFormat("Building destroyed {0}", obj.Target);
                 hitBuilding.DestroySelf();
                 OnBuildingDestroyed(hitBuilding);
             }
