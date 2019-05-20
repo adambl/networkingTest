@@ -14,12 +14,14 @@ public class MissleController : MonoBehaviourPun
     public float blastRadius = 5f;
 
     public DamageManager damageManager;
-    private Rigidbody rigidbody;
+
+
+public GameObject damageRadiusPrefab;
 
     public void Start()
     {
-        rigidbody = GetComponent<Rigidbody>();
-        transform.rotation = Quaternion.LookRotation(rigidbody.velocity);
+        Rigidbody rbody = GetComponent<Rigidbody>();
+        transform.rotation = Quaternion.LookRotation(rbody.velocity);
         plane = GameObject.FindWithTag("GamePlayPlane");
         damageManager = (DamageManager)GameObject.Find("DamageManager").GetComponent<DamageManager>();
     }
@@ -37,7 +39,13 @@ public class MissleController : MonoBehaviourPun
     {
         if (photonView.IsMine)
         {
-            rigidbody.constraints = RigidbodyConstraints.FreezeAll;
+            //show the blast radius
+            GameObject damage = Instantiate(damageRadiusPrefab, collision.transform.position, Quaternion.identity);
+            damage.transform.localScale = new Vector3(blastRadius, 0, blastRadius);
+
+            //freeze and destroy the missle
+            Rigidbody rbody = GetComponent<Rigidbody>(); 
+            rbody.constraints = RigidbodyConstraints.FreezeAll;
             DestroySelf();
 
         }
@@ -58,7 +66,8 @@ public class MissleController : MonoBehaviourPun
             DestroySelf();
             return;
         }
-        transform.rotation = Quaternion.LookRotation(rigidbody.velocity);
+        Rigidbody rbody = GetComponent<Rigidbody>();
+        transform.rotation = Quaternion.LookRotation(rbody.velocity);
     }
 
     private bool IsOutOfBounds()
